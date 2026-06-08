@@ -11,7 +11,6 @@ permissions:
 
 env:
   FLUTTER_VERSION: '3.29.3'
-  ANDROID_NDK_VERSION: '27.0.12077973'
 
 jobs:
   build:
@@ -27,12 +26,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android NDK
-        run: sdkmanager "ndk;${ANDROID_NDK_VERSION}"
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -40,11 +33,19 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Set up Android NDK r27
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27
+          add-to-path: false
+
       - name: Show tool versions
         run: |
           java -version
           flutter --version
           flutter doctor -v
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
 
       - name: Get Flutter packages
         run: flutter pub get
@@ -53,7 +54,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build debug APK
-        run: flutter build apk --debug --verbose
+        run: flutter build apk --debug
 
       - name: List APK files
         if: always()
